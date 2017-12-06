@@ -25,6 +25,13 @@ const game = {
     }
   },
 
+  showStatus : function (player) {
+    var name = $('<div>').text(player.name);
+    var win = $('<div>').text("win: " + player.win);
+    var lose = $('<div>').text("lose: " + player.lose);
+    $('#player1status').append(name).append(win).append(lose);
+  }
+
   start : function () {
     game.showChoices();
 
