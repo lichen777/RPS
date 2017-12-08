@@ -34,30 +34,37 @@ const panel = {
       $(id).empty();
       var image = $('<img>').attr('src', panel.choicesImg[(panel.choices.indexOf(value))]);
       $(id).append(image);
-      $(id).append("<p>selected</p>");
+      $(id).append("<div class='result' ><p>selected</p><p>Waiting for another player to select.</p></div>");
       
       if (id === '#player1'){
         player1.selected = value;
+        database.ref("/game").update({
+          player1Pick: player1.selected
+        });
       } else if (id === '#player2') {
         player2.selected = value;
+        database.ref("/game").update({
+          player2Pick: player2.selected
+        });
       } 
-    });
+    });//
   },
 
-  playerLogin : function() {
+  playerLogin : function () {
     $('#player1-btn').click(function (event) {
       event.preventDefault();
       var input = $("#player1-name").val().trim();
       if(input){
-        console.log(input);
         $('#player1-name').val("");
         player1.name = input;
+        player1.win = initialNum;
+        player1.lose = initialNum;
         yourRole = player1.id;
         panel.playerLogged();
-        database.ref("/player1").set({
+        database.ref("/player/player1").set({
           name: player1.name,
           win: player1.win,
-          lose: player1.lose
+          lose: player1.lose,
         });
       } 
     })
@@ -67,12 +74,14 @@ const panel = {
       if(input){
         $('#player2-name').val("");
         player2.name = input;
+        player2.win = initialNum;
+        player2.lose = initialNum;
         yourRole = player2.id;
         panel.playerLogged();
-        database.ref("/player2").set({
+        database.ref("/player/player2").set({
           name: player2.name,
           win: player2.win,
-          lose: player2.lose
+          lose: player2.lose,
         });
       }
     })
@@ -120,40 +129,108 @@ const panel = {
 
 const game = {
 
-  dataUpdate : function() {
-    database.ref("/player1").on("value", function(snapshot) {
+  nameUpdate : function () {
+    database.ref("/player/player1").on("value", function(snapshot) {
       if (snapshot.val().name){
         player1.name = snapshot.val().name;
-        player1.win = snapshot.val().win;
-        player1.lose = snapshot.val().lose;
         panel.showStatus();
       }
     })
-    database.ref("/player2").on("value", function(snapshot) {
+    database.ref("/player/player2").on("value", function(snapshot) {
       if (snapshot.val().name){
         player2.name = snapshot.val().name;
-        player2.win = snapshot.val().win;
-        player2.lose = snapshot.val().lose;
         panel.showStatus();
       }
     })
-    panel.playerLogin();
+    //panel.playerLogin();
+  },
+
+  scoreUpdate : function () {
+    database.ref("/player").on("value", function(snapshot) {
+      player1.win = snapshot.child("player1").child("win").val();
+      player1.lose = snapshot.child("player1").child("lose").val();
+      player2.win = snapshot.child("player2").child("win").val();
+      player2.lose = snapshot.child("player2").child("lose").val();
+      panel.showStatus();
+    })
+  },
+
+  judge : function (p1, p2) {
+    if (yourRole === "#player1"){
+      return logic[p1][p2];
+    } else if (yourRole === "#player2"){
+      return logic[p2][p1];
+    }
   },
 
   start : function () {
-    game.dataUpdate();
-    //panel.playerLogin();
-    database.ref().on("value", function(snapshot) {
+    
+    panel.playerLogin();
+    game.nameUpdate();
+    database.ref("/player").on("value", function(snapshot) {
+      console.log(snapshot.val().name);
+      console.log(snapshot.child("player1").child("name").val());
       if(snapshot.child("player1").child("name").val() && snapshot.child("player2").child("name").val()){
-        console.log("yes");
+        console.log("both logged");
         $('.waiting').empty();
         panel.showChoices(yourRole);
       }
-    });
+    })
 
+    database.ref("/game").on("value", function(snapshot) {
+      if(snapshot.child("player1Pick").val() && snapshot.child("player2Pick").val()){
+        console.log("both selected");
+        var result = game.judge(snapshot.child("player1Pick").val(),snapshot.child("player2Pick").val());
+        console.log(result);
+        $('.result').text("You " + result + " !");
+        
+        database.ref("/game").remove();
 
-    //panel.showStatus();
+        if (yourRole === "#player1") {
+          if (result === "win") {
+            player1.win ++;
+          }
+          if (result === "lose") {
+            player1.lose ++;
+          }
+          database.ref("/player/player1").update({
+            win: player1.win,
+            lose: player1.lose,
+          });
+        } else if (yourRole === "#player2") {
+          if (result === "win") {
+            player2.win ++;
+          }
+          if (result === "lose") {
+            player2.lose ++;
+          }
+          database.ref("/player/player2").update({
+            win: player2.win,
+            lose: player2.lose,
+          });
+        }
 
+        game.scoreUpdate();
+
+        setTimeout(function () {
+          console.log("3");
+        }, 1000);
+
+        setTimeout(function () {
+          console.log("2");
+        }, 1000);
+
+        setTimeout(function () {
+          console.log("1");
+        }, 1000);
+
+        setTimeout(function () {
+          console.log("timeout");
+          //panel.showChoices(yourRole);
+        }, 5000);
+            
+      }
+    }); 
   }
 
 } // Object: game
