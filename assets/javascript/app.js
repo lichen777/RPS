@@ -142,7 +142,6 @@ const game = {
         panel.showStatus();
       }
     })
-    //panel.playerLogin();
   },
 
   scoreUpdate : function () {
@@ -163,19 +162,25 @@ const game = {
     }
   },
 
+  readyToGo : function () {
+    database.ref("/player").on("value", function(snapshot) {
+      if(snapshot.child("player1").child("name").val() && snapshot.child("player2").child("name").val()){
+        console.log("both logged");
+        $('.waiting').empty();
+        setTimeout(function () {
+          console.log("timeout");
+          panel.showChoices(yourRole);
+        }, 3000);
+      }
+    })
+  },
+
   start : function () {
     
     panel.playerLogin();
     game.nameUpdate();
-    database.ref("/player").on("value", function(snapshot) {
-      console.log(snapshot.val().name);
-      console.log(snapshot.child("player1").child("name").val());
-      if(snapshot.child("player1").child("name").val() && snapshot.child("player2").child("name").val()){
-        console.log("both logged");
-        $('.waiting').empty();
-        panel.showChoices(yourRole);
-      }
-    })
+    
+    game.readyToGo();
 
     database.ref("/game").on("value", function(snapshot) {
       if(snapshot.child("player1Pick").val() && snapshot.child("player2Pick").val()){
@@ -212,23 +217,8 @@ const game = {
 
         game.scoreUpdate();
 
-        setTimeout(function () {
-          console.log("3");
-        }, 1000);
-
-        setTimeout(function () {
-          console.log("2");
-        }, 1000);
-
-        setTimeout(function () {
-          console.log("1");
-        }, 1000);
-
-        setTimeout(function () {
-          console.log("timeout");
-          //panel.showChoices(yourRole);
-        }, 5000);
-            
+        game.readyToGo();
+        
       }
     }); 
   }
