@@ -185,9 +185,12 @@ const game = {
     database.ref("/game").on("value", function(snapshot) {
       if(snapshot.child("player1Pick").val() && snapshot.child("player2Pick").val()){
         console.log("both selected");
+
         var result = game.judge(snapshot.child("player1Pick").val(),snapshot.child("player2Pick").val());
         console.log(result);
         $('.result').text("You " + result + " !");
+
+        //
         
         database.ref("/game").remove();
 
@@ -228,6 +231,7 @@ const game = {
 const initialNum = 0;
 
 let yourRole = "";
+let opponent = "";
 
 const player1 = {
   name : "",
