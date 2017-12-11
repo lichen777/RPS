@@ -95,19 +95,16 @@ const panel = {
     if (player1.name !== "") {
       var text = $('<div>').text("Waiting for Another Player to Join").addClass("waiting");
       $('#player2-block').prepend(text);
-      panel.showStatus();
-      
-      
+      panel.showStatus();  
     } else if (player2.name !== "") {
       var text = $('<div>').text("Waiting for Another Player to Join").addClass("waiting");
       $('#player1-block').prepend(text);
-      panel.showStatus();
-      
+      panel.showStatus(); 
     }
-
   },
 
   showStatus : function () {
+    game.scoreUpdate();
     if(player1.name !== ""){
       $('#player1-login').hide();
       $('#player1-status').empty();
@@ -133,25 +130,13 @@ const game = {
 
   nameUpdate : function () {
     database.ref("/player/player1").on("value", function(snapshot) {
-      if (snapshot.val().name){
-        var con = database.ref("player/player1");
-        con.onDisconnect().set({ //not working, because this function doesn't select player on disconnect. any one left can trigger this function
-          name: "",
-          win: initialNum,
-          lose: initialNum,
-        });
+      if (snapshot.val()){
         player1.name = snapshot.val().name;
         panel.showStatus();
       }
     })
     database.ref("/player/player2").on("value", function(snapshot) {
-      if (snapshot.val().name){
-        var con = database.ref("player/player2");
-        con.onDisconnect().set({ //not working, because this function doesn't select player on disconnect. any one left can trigger this function
-          name: "",
-          win: initialNum,
-          lose: initialNum,
-        });
+      if (snapshot.val()){
         player2.name = snapshot.val().name;
         panel.showStatus();
       }
@@ -164,7 +149,6 @@ const game = {
       player1.lose = snapshot.child("player1").child("lose").val();
       player2.win = snapshot.child("player2").child("win").val();
       player2.lose = snapshot.child("player2").child("lose").val();
-      panel.showStatus();
     })
   },
 
@@ -235,7 +219,7 @@ const game = {
 
         database.ref("/game").remove();
 
-        game.scoreUpdate();
+        panel.showStatus();
 
         game.readyToGo();
         
@@ -293,9 +277,60 @@ connectionsRef.on("value", function(snap) {
   $("#watchers").text(snap.numChildren());
 });
 
+var chatData = database.ref("/chatroom");
+
 
 $(document).ready(function() {
   
   game.main();
-  
+
+  window.onbeforeunload = function () {
+    if (yourRole == "#player1") {
+      database.ref("player/player1").set({ 
+        name: "",
+        win: initialNum,
+        lose: initialNum,
+      });
+
+    } else if (yourRole == "#player2") {
+      database.ref("player/player2").set({ 
+        name: "",
+        win: initialNum,
+        lose: initialNum,
+      });
+
+    }
+  };
+
+  database.ref("/player").on("value", function(snapshot) {
+    if(yourRole) {
+      if(snapshot.child("player1").child("name").val() == "" || snapshot.child("player2").child("name").val() == ""){
+        $(".waiting").text("Your opponent is not here. Waiting for Another Player to Join");
+        game.nameUpdate();
+      }
+    }
+  });
+
+  $("#submitmsg").click(function (e) {
+    e.preventDefault();
+    var name = $("#userName").val().trim();
+    var msg = $("#usermsg").val().trim();
+    if(name && msg) {
+      chatData.push({
+        name: name,
+        text: msg,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP
+      });
+      $("#usermsg").val("");
+      $("#userName").attr("readonly", "true");
+    }
+  });
+
+  chatData.orderByChild("dateAdded").limitToLast(5).on("child_added", function(snapshot) {
+    var sv = snapshot.val();
+    $("#chatArea").prepend("<p><b>" + sv.name + "</b>: " + sv.text + "</p>");
+  }, function(errorObject) {
+    console.log("Errors handled: " + errorObject.code);
+  });
+
 })
