@@ -60,6 +60,7 @@ const panel = {
         player1.win = initialNum;
         player1.lose = initialNum;
         yourRole = player1.id;
+        opponent = player2.id;
         panel.playerLogged();
         database.ref("/player/player1").set({
           name: player1.name,
@@ -77,6 +78,7 @@ const panel = {
         player2.win = initialNum;
         player2.lose = initialNum;
         yourRole = player2.id;
+        opponent = player1.id;
         panel.playerLogged();
         database.ref("/player/player2").set({
           name: player2.name,
@@ -132,12 +134,24 @@ const game = {
   nameUpdate : function () {
     database.ref("/player/player1").on("value", function(snapshot) {
       if (snapshot.val().name){
+        var con = database.ref("/player/player1");
+        con.onDisconnect().set({
+          name: "",
+          win: initialNum,
+          lose: initialNum,
+        });
         player1.name = snapshot.val().name;
         panel.showStatus();
       }
     })
     database.ref("/player/player2").on("value", function(snapshot) {
       if (snapshot.val().name){
+        var con = database.ref("/player/player2");
+        con.onDisconnect().set({
+          name: "",
+          win: initialNum,
+          lose: initialNum,
+        });
         player2.name = snapshot.val().name;
         panel.showStatus();
       }
@@ -169,13 +183,14 @@ const game = {
         $('.waiting').empty();
         setTimeout(function () {
           console.log("timeout");
+          $(opponent).empty();
           panel.showChoices(yourRole);
         }, 3000);
       }
     })
   },
 
-  start : function () {
+  main : function () {
     
     panel.playerLogin();
     game.nameUpdate();
@@ -190,11 +205,9 @@ const game = {
         console.log(result);
         $('.result').text("You " + result + " !");
 
-        //
-        
-        database.ref("/game").remove();
-
         if (yourRole === "#player1") {
+          var image = $('<img>').attr('src', panel.choicesImg[(panel.choices.indexOf(snapshot.child("player2Pick").val()))]);
+          $(opponent).append(image);
           if (result === "win") {
             player1.win ++;
           }
@@ -206,6 +219,8 @@ const game = {
             lose: player1.lose,
           });
         } else if (yourRole === "#player2") {
+          var image = $('<img>').attr('src', panel.choicesImg[(panel.choices.indexOf(snapshot.child("player1Pick").val()))]);
+          $(opponent).append(image);
           if (result === "win") {
             player2.win ++;
           }
@@ -217,6 +232,8 @@ const game = {
             lose: player2.lose,
           });
         }
+
+        database.ref("/game").remove();
 
         game.scoreUpdate();
 
@@ -279,6 +296,6 @@ connectionsRef.on("value", function(snap) {
 
 $(document).ready(function() {
   
-  game.start();
+  game.main();
   
 })
