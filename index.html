@@ -21,11 +21,11 @@
 					<div id="player1-login">
 						<form>
 							<div class="form-group row">
-						      <label for="player1-name" class="col-md-5 col-sm-12 col-form-label">Enter Your Name To Join: </label>
-						      <div class="col-md-4 col-sm-12">
+						      <label for="player1-name" class="col-lg-6 col-md-12 col-form-label">Enter Your Name To Join: </label>
+						      <div class="col-lg-3 col-md-12">
 						        <input type="text" class="form-control" id="player1-name">
 						      </div>
-						      <div class="col-md-2 col-sm-12">
+						      <div class="col-lg-2 col-md-12">
 								<button type="button" class="btn btn-primary" id="player1-btn">Submit</button>
 							  </div>
 						    </div>
@@ -38,11 +38,11 @@
 					<div id="player2-login">
 						<form>
 							<div class="form-group row">
-						      <label for="player2-name" class="col-md-5 col-sm-12 col-form-label">Enter Your Name To Join: </label>
-						      <div class="col-md-4 col-sm-12">
+						      <label for="player2-name" class="col-lg-6 col-md-12 col-form-label">Enter Your Name To Join: </label>
+						      <div class="col-lg-3 col-md-12">
 						        <input type="text" class="form-control" id="player2-name">
 						      </div>
-						      <div class="col-md-2 col-sm-12">
+						      <div class="col-lg-2 col-md-12">
 								<button type="button" class="btn btn-primary" id="player2-btn">Submit</button>
 							  </div>
 						    </div>
@@ -52,14 +52,25 @@
 					<div id="player2"></div>		
 				</div>
 			</div>
-			<div class="row" id="chatbox">
+			<div class="mt-3 py-3 row border rounded" id="chatbox">
 				<div class="col-12">
+					<h5>Chat Room</h5>
 					<p><span id="watchers"></span> people are watching in the room!</p>
-					<div id="chat-area" id="chat-area"></div>
 					<form name="message" action="">
-        				<input name="usermsg" type="text" id="usermsg" />
-        				<input name="submitmsg" type="submit"  id="submitmsg" value="Send" />
+						<div class="row">
+							<div class="col-sm-2">
+								<input name="userName" class="form-control" type="text" id="userName" placeholder="id"/>
+							</div>
+							<div class="col-sm-8">
+								<input name="usermsg" class="form-control" type="text" id="usermsg" placeholder="Message"/>
+							</div>
+							<div class="col-sm-2">
+        						<button name="submitmsg" class="btn btn-secondary" type="button" id="submitmsg" value="Send">Send</button>
+							</div>
+						</div>
     				</form>
+    				<br>
+    				<div class="rounded" id="chatArea"></div>
 				</div>
 			</div>
 
