@@ -284,7 +284,7 @@ $(document).ready(function() {
   
   game.main();
 
-  window.onbeforeunload = function () {
+  window.onunload = function () {
     if (yourRole == "#player1") {
       database.ref("player/player1").set({ 
         name: "",
