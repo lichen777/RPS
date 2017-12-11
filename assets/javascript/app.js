@@ -134,8 +134,8 @@ const game = {
   nameUpdate : function () {
     database.ref("/player/player1").on("value", function(snapshot) {
       if (snapshot.val().name){
-        var con = database.ref("/player/player1");
-        con.onDisconnect().set({
+        var con = database.ref("player/player1");
+        con.onDisconnect().set({ //not working, because this function doesn't select player on disconnect. any one left can trigger this function
           name: "",
           win: initialNum,
           lose: initialNum,
@@ -146,8 +146,8 @@ const game = {
     })
     database.ref("/player/player2").on("value", function(snapshot) {
       if (snapshot.val().name){
-        var con = database.ref("/player/player2");
-        con.onDisconnect().set({
+        var con = database.ref("player/player2");
+        con.onDisconnect().set({ //not working, because this function doesn't select player on disconnect. any one left can trigger this function
           name: "",
           win: initialNum,
           lose: initialNum,
